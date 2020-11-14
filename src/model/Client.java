@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -13,7 +12,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 public class Client {
-	protected static String user;
+	protected static String sender;
 	protected static String password;
 	protected static String subject;
 	protected static String messageContent;
@@ -23,7 +22,7 @@ public class Client {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 		System.out.println("Por favor digite la dirección de su correo electronico: \n\t");
-			user = br.readLine();
+			sender = br.readLine();
 		
 		System.out.println("\nPor favor digite la contraseña de su correo electronico: \n\t");
 			password = br.readLine();
@@ -53,24 +52,30 @@ public class Client {
 		
 		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(user, password);
+				return new PasswordAuthentication(sender, password);
 			}
 		});
 		try {
 			MimeMessage mimeMessage = new MimeMessage(session);
-			mimeMessage.setFrom(new InternetAddress(user, subject));
+			mimeMessage.setFrom(new InternetAddress(sender, subject));
 			mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(addressee));
+			
+			/*
+			InternetAddress[] internetAddresses = {new InternetAddress("destinatario1@vojabes.com"),
+					new InternetAddress("destinatario2@vojabes.com"),
+					new InternetAddress("destinatario3@vojabes.com"),
+					new InternetAddress("destinatario4@vojabes.com"),
+					new InternetAddress("destinatario5@vojabes.com")};
+			*/
+			
+			//Se pone el Tema del correo
 			mimeMessage.setSubject(subject);
 			
-			//Message message = new MimeMessage(session);
-			//message.setFrom(new InternetAddress(user));
-			//message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(addressee));
-			//message.setSubject(subject);
-			//message.setText(messageContent);
-			
+			//Se crea un mimeBodyPart que almacenará en mensaje de texto plano
 			MimeBodyPart mimeBodyPart = new MimeBodyPart();
 			mimeBodyPart.setText(messageContent);
 			
+			//Se crea un mimeBodyPart que almacenará un archivo
 			MimeBodyPart mimeBodyPartAdjunt = new MimeBodyPart();
 			mimeBodyPartAdjunt.attachFile(new File("C:/Users/R00TKIT/Downloads/Infoteorica.pdf"));
 			
@@ -79,18 +84,21 @@ public class Client {
 			multipart.addBodyPart(mimeBodyPart);
 			multipart.addBodyPart(mimeBodyPartAdjunt);
 			
+			//Agrego las partes a el mensaje
 			mimeMessage.setContent(multipart);
 			
-			//Envio el vojabes
-			//Transport.send(message);
-			
+			//Creo el trasnport que enviará el mensaje, le indico el protocolo
 			Transport transport = session.getTransport("smtp");
-			transport.connect(user,password);
+			
+			//Para la conexion le indico el correo y la contraseña
+			transport.connect(sender,password);
+			
+			//Envio el mensaje
 			transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
 			
+			//Termino la conexion
 			transport.close();
 			System.out.println("\nSu mensaje de correo electronico ha sido enviado con exito.");
-
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}
