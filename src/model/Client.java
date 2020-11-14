@@ -1,12 +1,16 @@
 package model;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 public class Client {
 	protected static String user;
@@ -47,21 +51,44 @@ public class Client {
 		props.put("mail.smtp.host", "smtp.live.com"); 
 		props.put("mail.smtp.port", "25");
 		
-		
-
 		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication(user, password);
 			}
 		});
 		try {
-			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(user));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(addressee));
-			message.setSubject(subject);
-			message.setText(messageContent);
-
-			Transport.send(message);
+			MimeMessage mimeMessage = new MimeMessage(session);
+			mimeMessage.setFrom(new InternetAddress(user, subject));
+			mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(addressee));
+			mimeMessage.setSubject(subject);
+			
+			//Message message = new MimeMessage(session);
+			//message.setFrom(new InternetAddress(user));
+			//message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(addressee));
+			//message.setSubject(subject);
+			//message.setText(messageContent);
+			
+			MimeBodyPart mimeBodyPart = new MimeBodyPart();
+			mimeBodyPart.setText(messageContent);
+			
+			MimeBodyPart mimeBodyPartAdjunt = new MimeBodyPart();
+			mimeBodyPartAdjunt.attachFile(new File("C:/Users/R00TKIT/Downloads/Infoteorica.pdf"));
+			
+			//Agrego las partes
+			Multipart multipart = new MimeMultipart();
+			multipart.addBodyPart(mimeBodyPart);
+			multipart.addBodyPart(mimeBodyPartAdjunt);
+			
+			mimeMessage.setContent(multipart);
+			
+			//Envio el vojabes
+			//Transport.send(message);
+			
+			Transport transport = session.getTransport("smtp");
+			transport.connect(user,password);
+			transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
+			
+			transport.close();
 			System.out.println("\nSu mensaje de correo electronico ha sido enviado con exito.");
 
 		} catch (MessagingException e) {
