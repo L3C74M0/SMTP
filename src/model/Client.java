@@ -24,11 +24,11 @@ public class Client {
 		System.out.println("\nPor favor digite la contraseña de su correo electronico: \n\t");
 			password = br.readLine();
 		
-		System.out.println("\nPor favor el tema del correo a enviar: \n\t");
-			subject = br.readLine();
-		
 		System.out.println("\nPor favor digite el correo electronico del destinatario: \n\t");
 			addressee = br.readLine();
+			
+		System.out.println("\nPor favor el tema del correo a enviar: \n\t");
+			subject = br.readLine();
 		
 		System.out.println("\nPor favor digite el mensaje a enviar: \n\t");
 			messageContent = br.readLine();
@@ -62,7 +62,7 @@ public class Client {
 			message.setText(messageContent);
 
 			Transport.send(message);
-			System.out.println("Su mensaje de correo electronico ha sido enviado con exito.");
+			System.out.println("\nSu mensaje de correo electronico ha sido enviado con exito.");
 
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
