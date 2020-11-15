@@ -1,9 +1,7 @@
 package model;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -12,34 +10,10 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 public class Client {
-	protected static String sender;
-	protected static String password;
-	protected static String subject;
-	protected static String messageContent;
-	protected static String addressee;
-
-	public static void main(String[] args) throws NumberFormatException, IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-		System.out.println("Por favor digite la dirección de su correo electronico: \n\t");
-			sender = br.readLine();
-		
-		System.out.println("\nPor favor digite la contraseña de su correo electronico: \n\t");
-			password = br.readLine();
-		
-		System.out.println("\nPor favor digite el correo electronico del destinatario: \n\t");
-			addressee = br.readLine();
-			
-		System.out.println("\nPor favor el tema del correo a enviar: \n\t");
-			subject = br.readLine();
-		
-		System.out.println("\nPor favor digite el mensaje a enviar: \n\t");
-			messageContent = br.readLine();
-			
-		SendMail();
-	}
-
-	protected static void SendMail() throws IOException {
+	
+	private File attachedfile;
+	
+	public void SendMail(String sender, String password, String subject, String messageContent, String addressee) throws IOException {
 		Properties props = new Properties();
 		props.put("mail.smtp.auth", "true");
 		props.put("mail.smtp.starttls.enable", "true");
@@ -59,15 +33,7 @@ public class Client {
 			MimeMessage mimeMessage = new MimeMessage(session);
 			mimeMessage.setFrom(new InternetAddress(sender, subject));
 			mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(addressee));
-			
-			/*
-			InternetAddress[] internetAddresses = {new InternetAddress("destinatario1@vojabes.com"),
-					new InternetAddress("destinatario2@vojabes.com"),
-					new InternetAddress("destinatario3@vojabes.com"),
-					new InternetAddress("destinatario4@vojabes.com"),
-					new InternetAddress("destinatario5@vojabes.com")};
-			*/
-			
+						
 			//Se pone el Tema del correo
 			mimeMessage.setSubject(subject);
 			
@@ -75,14 +41,16 @@ public class Client {
 			MimeBodyPart mimeBodyPart = new MimeBodyPart();
 			mimeBodyPart.setText(messageContent);
 			
-			//Se crea un mimeBodyPart que almacenará un archivo
-			MimeBodyPart mimeBodyPartAdjunt = new MimeBodyPart();
-			mimeBodyPartAdjunt.attachFile(new File("C:/Users/R00TKIT/Downloads/Infoteorica.pdf"));
-			
 			//Agrego las partes
 			Multipart multipart = new MimeMultipart();
 			multipart.addBodyPart(mimeBodyPart);
-			multipart.addBodyPart(mimeBodyPartAdjunt);
+			
+			//Se crea un mimeBodyPart que almacenará un archivo
+			if(attachedfile!=null) {	
+				MimeBodyPart mimeBodyPartAdjunt = new MimeBodyPart();
+				mimeBodyPartAdjunt.attachFile(attachedfile);				
+				multipart.addBodyPart(mimeBodyPartAdjunt);
+			}
 			
 			//Agrego las partes a el mensaje
 			mimeMessage.setContent(multipart);
@@ -103,4 +71,8 @@ public class Client {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public void setAttachedfile(File attachedfile) {
+		this.attachedfile = attachedfile;
+	}	
 }
